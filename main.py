@@ -1,16 +1,20 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton
+import sys
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Milamber")
+        button = QPushButton("Press Me!")
+
+        self.setCentralWidget(button)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+app = QApplication(sys.argv)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+window = MainWindow()
+window.show()
+
+app.exec()
