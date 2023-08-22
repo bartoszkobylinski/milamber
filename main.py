@@ -1,7 +1,9 @@
 import requests
+from PyQt6.QtCore import Qt
+
 from secret_data import MILAMBER_WEBHOOK
 from PyQt6.QtWidgets import (QApplication, QWidget, QMainWindow, QPushButton, QVBoxLayout, QLineEdit, QScrollArea,
-                             QTextEdit, QHBoxLayout, QListWidget, QLabel, QListWidgetItem)
+                             QTextEdit, QHBoxLayout, QListWidget, QLabel, QListWidgetItem, QLayout, QFrame)
 from PyQt6.QtGui import QIcon, QPixmap
 import sys
 
@@ -17,10 +19,19 @@ class ChatItem(QWidget):
             icon_label.setPixmap(pixmap.scaled(32, 32))
             layout.addWidget(icon_label)
 
-        text_label = QTextEdit(self)
-        text_label.setPlainText(text)
-        text_label.setReadOnly(True)
-        layout.addWidget(text_label)
+        self.text_edit = QTextEdit(self)
+        self.text_edit.setPlainText(text)
+        self.text_edit.setReadOnly(True)
+        self.text_edit.setFrameShape(QFrame.Shape.NoFrame)
+        self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        layout.addWidget(self.text_edit)
+
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetFixedSize)
+
+        def showEvent(self, event):
+            super().showEvent(event)
+            self.text_edit.setFixedSize(self.text_edit.document().size().toSize())
 
 
 class MainWindow(QMainWindow):
