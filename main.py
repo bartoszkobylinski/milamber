@@ -1,11 +1,27 @@
 import requests
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 
 from secret_data import MILAMBER_WEBHOOK
 from PyQt6.QtWidgets import (QApplication, QWidget, QMainWindow, QPushButton, QVBoxLayout, QLineEdit, QScrollArea,
                              QTextEdit, QHBoxLayout, QListWidget, QLabel, QListWidgetItem, QLayout, QFrame)
 from PyQt6.QtGui import QIcon, QPixmap
 import sys
+
+
+class Editor(QTextEdit):
+    def __init__(self):
+        super().__init__()
+        self.setReadOnly(True)
+        self.textChanged.connect(self.autoResize)
+
+    def autoResize(self):
+        self.document().setTextWidth(self.viewport().width())
+        margins = self.contentsMargins()
+        height = int(self.document().size().height() + margins.top() + margins.bottom())
+        self.setFixedHeight(height)
+
+    def resizeEvent(self, event):
+        self.autoResize()
 
 
 class ChatItem(QWidget):
@@ -19,9 +35,8 @@ class ChatItem(QWidget):
             icon_label.setPixmap(pixmap.scaled(32, 32))
             layout.addWidget(icon_label)
 
-        self.text_edit = QTextEdit(self)
+        self.text_edit = Editor()
         self.text_edit.setPlainText(text)
-        self.text_edit.setReadOnly(True)
         self.text_edit.setFrameShape(QFrame.Shape.NoFrame)
         self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.text_edit.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -37,6 +52,7 @@ class ChatItem(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.button = QPushButton("Send", self)
         self.milamber_webhook = MILAMBER_WEBHOOK
         self.setWindowTitle("Milamber")
         self.setWindowIcon(QIcon("milamber.icns"))
@@ -51,9 +67,10 @@ class MainWindow(QMainWindow):
         self.input_field = QLineEdit(self)
         layout.addWidget(self.input_field)
 
-        button = QPushButton("Send", self)
-        button.clicked.connect(self.send_to_milamber_webhook)
-        layout.addWidget(button)
+        self.input_field.returnPressed.connect(self.send_to_milamber_webhook)
+
+        self.button.clicked.connect(self.send_to_milamber_webhook)
+        layout.addWidget(self.button)
 
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
@@ -91,6 +108,10 @@ class MainWindow(QMainWindow):
 
         except requests.RequestException as error:
             self.response_text_edit.setText(f"Network error {error}")
+
+        self.button.animateClick()
+        self.button.setStyleSheet("background-color: blue")
+        QTimer.singleShot(100, lambda: self.button.setStyleSheet(""))
 
 
 if __name__ == "__main__":
